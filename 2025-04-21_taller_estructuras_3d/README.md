@@ -1,20 +1,5 @@
 # Threejs
 
-## Scaffold y estructura del proyecto
-
-- Proyecto creado con **Vite + React**:
-  ```bash
-  npm create vite@latest my-app -- --template react
-  ```
-- Scripts configurados: `dev`, `build`, `preview`.
-- CSS global para ocupar todo el viewport con fondo negro.
-
-## Estructura simplificada
-
-- `src/main.jsx`: monta el componente `<App />`.
-- `src/App.jsx`: contiene toda la lógica de visualización e interfaz.
-- `public/model.obj`: modelo servido estáticamente como `/model.obj`.
-
 ## Carga y renderizado del modelo
 
 - Se usa `useLoader(OBJLoader, '/model.obj')` desde React Three Fiber.
@@ -70,3 +55,4 @@ Ambos paneles tienen:
 - Se crea la animación de rotación con `FuncAnimation` actualizando la vista (`ax.view_init`).
 - Se guarda como GIF usando `anim.save(..., writer='pillow')`.
 - Se muestra inline en la notebook con `IPython.display.Image`.
+![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
