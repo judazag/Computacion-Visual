@@ -1,4 +1,19 @@
-#threejs
+# Threejs
+
+## Scaffold y estructura del proyecto
+
+- Proyecto creado con **Vite + React**:
+  ```bash
+  npm create vite@latest my-app -- --template react
+  ```
+- Scripts configurados: `dev`, `build`, `preview`.
+- CSS global para ocupar todo el viewport con fondo negro.
+
+## Estructura simplificada
+
+- `src/main.jsx`: monta el componente `<App />`.
+- `src/App.jsx`: contiene toda la lógica de visualización e interfaz.
+- `public/model.obj`: modelo servido estáticamente como `/model.obj`.
 
 ## Carga y renderizado del modelo
 
@@ -31,3 +46,27 @@ Ambos paneles tienen:
 
 - Control de cámara con `<OrbitControls>` (rotación, zoom, desplazamiento).
 - DPI adaptativo (`dpr={[1, 2]}`) para equilibrar calidad y rendimiento.
+
+# Python
+
+## Subida y carga del modelo
+
+- Se sube el archivo `.OBJ` a la VM de Colab usando `files.upload()`.
+- Se carga la malla con `trimesh.load_mesh(filename)`, obteniendo un objeto `Trimesh`.
+
+## Extracción de información estructural
+
+- De `mesh.vertices` y `mesh.faces` se obtienen los vértices y las caras triangulares (`len(...)`).
+- De `mesh.edges_unique` se extraen las aristas únicas y se cuenta su número.
+
+## Visualización 3D con Matplotlib
+
+- **Vértices**: puntos rojos con `ax.scatter(...)`.
+- **Aristas**: líneas azules mediante `ax.plot(...)`.
+- **Caras**: polígonos grises semitransparentes con `Poly3DCollection`.
+
+## Animación y exportación a GIF
+
+- Se crea la animación de rotación con `FuncAnimation` actualizando la vista (`ax.view_init`).
+- Se guarda como GIF usando `anim.save(..., writer='pillow')`.
+- Se muestra inline en la notebook con `IPython.display.Image`.
