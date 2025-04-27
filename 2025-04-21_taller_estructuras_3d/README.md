@@ -1,115 +1,100 @@
-# Unity
+# Construyendo el Mundo 3D: Vértices, Aristas y Caras
 
-## Creación y configuración de la escena
+## Python: Visualización de Malla 3D con Rotación
 
-- Iniciar un proyecto 3D en Unity Hub.  
-- Ajustar la posición y rotación de la Main Camera para encuadrar el modelo.
+**Objetivo:**  
+Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
 
-## Importación del modelo .obj
+**Técnicas usadas:**
+- Librerías: `trimesh`, `matplotlib`, `numpy`.
+- `Poly3DCollection` para renderizar caras.
+- `scatter` para vértices y `plot` para aristas.
+- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
 
-- Copiar el archivo `.obj` a la carpeta `Assets`.  
-- En el Inspector, ajustar parámetros del modelo (Scale Factor, ejes, etc.).  
-- Colocar el modelo en la escena arrastrándolo desde `Assets` a la Scene View.
+**Pasos principales:**
+- Definir límites y aspecto de la figura en 3D.
+- `animate(angle)`:
+  - Limpiar y reconfigurar los ejes 3D.
+  - Dibujar:
+    - Caras grises semitransparentes.
+    - Aristas azules.
+    - Vértices rojos.
+- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
+- Guardar como GIF usando `pillow`.
 
-## Script en C#: estadísticas y wireframe
+**Resultado:**  
+Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
 
-```csharp
-public class ModelStats : MonoBehaviour
-{
-    public bool showWireframe = false;
-
-    void Start()
-    {
-        Mesh mesh = GetComponent<MeshFilter>().mesh;
-        Debug.Log("Vertices: " + mesh.vertexCount);
-        Debug.Log("Triángulos: " + (mesh.triangles.Length / 3));
-        Debug.Log("Submallas: " + mesh.subMeshCount);
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        if (showWireframe)
-        {
-            Mesh mesh = GetComponent<MeshFilter>().mesh;
-            Gizmos.DrawWireMesh(mesh, transform.position, transform.rotation, transform.localScale);
-        }
-    }
-}
-```
-
-## Configuración de la interfaz (UI)
-
-- Crear un Canvas y dos botones (`UI → Button`).  
-- Enlazar cada botón para alternar `showWireframe`:
-  ```csharp
-  wireframeButton.onClick.AddListener(() => showWireframe = true);
-  solidButton.onClick.AddListener(() => showWireframe = false);
-  ```
-
-## Funcionamiento interno
-
-- Unity convierte el `.obj` en un `Mesh` accesible vía `MeshFilter.mesh`.  
-- Las propiedades de la malla (`vertexCount`, `triangles`, `subMeshCount`) permiten obtener estadísticas en tiempo de ejecución.  
-- Los `Gizmos` se usan en modo Editor para dibujar el wireframe sin afectar el juego final (alternativamente, `GL.wireframe` puede forzarlo en Play Mode).  
-- El sistema de UI de Unity (EventSystem + Graphic Raycaster) captura clics y dispara los eventos `onClick` que llaman a los listeners definidos en el script.  
-
-
-# Threejs
-
-## Carga y renderizado del modelo
-
-- Se usa `useLoader(OBJLoader, '/model.obj')` desde React Three Fiber.
-- Material básico (`meshBasicMaterial`), sin luces ni sombras.
-- Fondo sólido negro para simplificar la apariencia.
-
-## Modos de visualización (`<ModelEnhanced />`)
-
-Renderiza diferentes aspectos de la geometría según flags booleanos:
-
-- `Mesh`: malla con color uniforme.
-- `Edges`: solo las aristas mediante `<Edges />`.
-- `Wireframe`: malla completa en modo entramado.
-- `Vertices`: puntos en cada vértice usando un `<points>` personalizado.
-
-## Interfaz de usuario y panel de información
-
-- `.ui-panel`: checkboxes para activar/desactivar cada modo.
-- `.info-panel`: muestra número de vértices y caras usando `useEffect`.
-
-Ambos paneles tienen:
-
-- Fondo semitransparente
-- Desenfoque (blur)
-- Bordes redondeados
-- Posicionamiento absoluto sobre el `<canvas>`
-
-## Interacción y rendimiento
-
-- Control de cámara con `<OrbitControls>` (rotación, zoom, desplazamiento).
-- DPI adaptativo (`dpr={[1, 2]}`) para equilibrar calidad y rendimiento.
-
-# Python
-
-## Subida y carga del modelo
-
-- Se sube el archivo `.OBJ` a la VM de Colab usando `files.upload()`.
-- Se carga la malla con `trimesh.load_mesh(filename)`, obteniendo un objeto `Trimesh`.
-
-## Extracción de información estructural
-
-- De `mesh.vertices` y `mesh.faces` se obtienen los vértices y las caras triangulares (`len(...)`).
-- De `mesh.edges_unique` se extraen las aristas únicas y se cuenta su número.
-
-## Visualización 3D con Matplotlib
-
-- **Vértices**: puntos rojos con `ax.scatter(...)`.
-- **Aristas**: líneas azules mediante `ax.plot(...)`.
-- **Caras**: polígonos grises semitransparentes con `Poly3DCollection`.
-
-## Animación y exportación a GIF
-
-- Se crea la animación de rotación con `FuncAnimation` actualizando la vista (`ax.view_init`).
-- Se guarda como GIF usando `anim.save(..., writer='pillow')`.
-- Se muestra inline en la notebook con `IPython.display.Image`.
-## GIF
 ![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
+---
+## Three.js: Visualización interactiva de malla 3D
+
+**Objetivo:**  
+Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+
+**Técnicas usadas:**
+- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
+- **OBJLoader** para importar geometría.
+- **BufferGeometry** y `<points>` para puntos en vértices.
+- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
+- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+
+**Pasos principales:**
+1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
+2. **Carga del modelo**:
+   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
+   - Extraer `geometry` y, en `useEffect`, calcular:
+     - `vertCount = geometry.attributes.position.count`
+     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
+3. **VertexDots**:  
+   - Extraer atributo `position` a un `BufferGeometry` nuevo.
+   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
+4. **ModelEnhanced**:  
+   - Condicionalmente renderizar:
+     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
+     - Aristas (`<Edges>`).
+     - Wireframe (`<Wireframe>`).
+     - Vértices (`<VertexDots>`).
+5. **Escena**:
+   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
+   - Fondo negro (`<color attach="background" args={["#000"]} />`).
+   - `<Suspense>` para carga asíncrona.
+   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
+6. **Estilos CSS**:
+   - Canvas fullscreen.
+   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+
+**Resultado:**  
+Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
+![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
+
+---
+## Unity: Importación de OBJ y alternancia de Wireframe
+
+**Objetivo:**  
+Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+
+**Técnicas usadas:**
+- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
+- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
+- **Debug.Log** para imprimir estadísticas en consola.
+- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+
+**Pasos principales:**
+1. **`Start()`**  
+   - Obtener `MeshFilter` y su `mesh`.  
+   - `Debug.Log` de:  
+     - Vértices: `mesh.vertexCount`  
+     - Caras: `mesh.triangles.Length/3`  
+     - Sub-mallas: `mesh.subMeshCount`  
+   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
+2. **`OnDrawGizmosSelected()`**  
+   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
+3. **`OnPreRender()` / `OnPostRender()`**  
+   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+
+**Resultado:**  
+En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
+![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
+
+---
