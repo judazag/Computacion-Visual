@@ -1,100 +1,62 @@
-# Construyendo el Mundo 3D: Vértices, Aristas y Caras
+# Taller Jerarquias Transformaciones
 
-## Python: Visualización de Malla 3D con Rotación
-
-**Objetivo:**  
-Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
-
-**Técnicas usadas:**
-- Librerías: `trimesh`, `matplotlib`, `numpy`.
-- `Poly3DCollection` para renderizar caras.
-- `scatter` para vértices y `plot` para aristas.
-- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
-
-**Pasos principales:**
-- Definir límites y aspecto de la figura en 3D.
-- `animate(angle)`:
-  - Limpiar y reconfigurar los ejes 3D.
-  - Dibujar:
-    - Caras grises semitransparentes.
-    - Aristas azules.
-    - Vértices rojos.
-- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
-- Guardar como GIF usando `pillow`.
-
-**Resultado:**  
-Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
-
-![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
----
-## Three.js: Visualización interactiva de malla 3D
+## Threejs:
 
 **Objetivo:**  
-Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+Mostrar cómo controlar de forma interactiva, mediante sliders, las transformaciones (rotación en Y y desplazamiento en X) de tres niveles de grupos jerárquicos (abuelo, padre e hijo) en una escena 3D con React-Three-Fiber y Leva.
 
-**Técnicas usadas:**
-- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
-- **OBJLoader** para importar geometría.
-- **BufferGeometry** y `<points>` para puntos en vértices.
-- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
-- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+**Técnicas usadas:**  
+- `react-three-fiber` para enlazar Three.js con React.  
+- `useRef` para referenciar cada grupo en la jerarquía.  
+- `useFrame` para aplicar en cada cuadro los valores de rotación y posición.  
+- `Leva` (`useControls`) para crear sliders que modifiquen dinámicamente esos valores.
 
-**Pasos principales:**
-1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
-2. **Carga del modelo**:
-   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
-   - Extraer `geometry` y, en `useEffect`, calcular:
-     - `vertCount = geometry.attributes.position.count`
-     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
-3. **VertexDots**:  
-   - Extraer atributo `position` a un `BufferGeometry` nuevo.
-   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
-4. **ModelEnhanced**:  
-   - Condicionalmente renderizar:
-     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
-     - Aristas (`<Edges>`).
-     - Wireframe (`<Wireframe>`).
-     - Vértices (`<VertexDots>`).
-5. **Escena**:
-   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
-   - Fondo negro (`<color attach="background" args={["#000"]} />`).
-   - `<Suspense>` para carga asíncrona.
-   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
-6. **Estilos CSS**:
-   - Canvas fullscreen.
-   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+**Pasos principales:**  
+- Definir refs para los tres grupos (`abuelo`, `padre`, `hijo`).  
+- Configurar sliders en Leva con rangos para rotación Y y posición X.  
+- En el bucle de render (`useFrame`), asignar los valores de los sliders a `rotation.y` y `position.x` de cada ref.  
+- Anidar los grupos de mayor a menor nivel y añadir tres mallas (cubo, esfera y cono) dentro del grupo “hijo” para visualizar el efecto jerárquico.  
+- Renderizar la escena con `<Canvas>` y luces (ambiental y direccional).
 
 **Resultado:**  
-Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
-![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
+Una escena 3D interactiva donde, al mover cada slider, se gira o desplaza el grupo correspondiente. Las transformaciones del “abuelo” afectan al “padre” y al “hijo”.
+![Threejs](https://github.com/user-attachments/assets/f699d752-e061-4ab8-a688-e6b09b239e3d)
 
 ---
-## Unity: Importación de OBJ y alternancia de Wireframe
+
+## Unity:
 
 **Objetivo:**  
-Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+Crear una interfaz interactiva que permita modificar en tiempo real la posición X, rotación Y y escala de un objeto padre en la jerarquía (padre → hijo → nieto), además de activar o pausar su animación de rotación continua.
 
-**Técnicas usadas:**
-- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
-- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
-- **Debug.Log** para imprimir estadísticas en consola.
-- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+**Técnicas usadas:**  
+- **UI de Unity (uGUI):** Sliders (`Slider`) para entrada de valores y textos (`Text`) para mostrar los valores actuales.  
+- **Eventos de UI:** `onValueChanged` en sliders y `onClick` en botón para vincular callbacks.  
+- **Transformaciones locales:** Ajuste de `transform.localPosition`, `localEulerAngles` y `localScale`.  
+- **Ciclo de vida de MonoBehaviour:** Uso de `Start()` para inicializar y `Update()` para animación continua.  
+- **Debugging:** `Debug.Log` para registrar cambios en consola.
 
-**Pasos principales:**
-1. **`Start()`**  
-   - Obtener `MeshFilter` y su `mesh`.  
-   - `Debug.Log` de:  
-     - Vértices: `mesh.vertexCount`  
-     - Caras: `mesh.triangles.Length/3`  
-     - Sub-mallas: `mesh.subMeshCount`  
-   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
-2. **`OnDrawGizmosSelected()`**  
-   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
-3. **`OnPreRender()` / `OnPostRender()`**  
-   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+**Pasos principales:**  
+1. **Escena y jerarquía:** Crear tres GameObjects anidados en orden padre → hijo → nieto.  
+2. **UI Setup:**  
+   - Añadir tres sliders y tres textos asociados.  
+   - Añadir un botón y un texto de estado para controlar la animación.  
+3. **Enlazar componentes:** En el inspector, arrastrar cada UI (slider/texto/botón) a sus campos públicos en `ParentTransformController`.  
+4. **Inicialización (`Start`)**  
+   - Ajustar sliders al estado inicial del objeto padre (`localPosition.x`, `localEulerAngles.y`, `localScale.x`).  
+   - Suscribir métodos `OnPosXChanged`, `OnRotYChanged` y `OnScaleChanged` a `onValueChanged` de cada slider.  
+   - Suscribir `OnToggleAnimation` al `onClick` del botón.  
+   - Llamar `UpdateUI()` y `UpdateAnimationUI()` para sincronizar valores en pantalla.  
+5. **Actualización continua (`Update`)**  
+   - Si `isAnimating` es verdadero, rotar el objeto padre en Y a velocidad `rotationSpeed`.  
+6. **Callbacks de sliders:**  
+   - **OnPosXChanged:** Actualiza `localPosition.x` y el texto `posXText`.  
+   - **OnRotYChanged:** Ajusta `localEulerAngles.y` y el texto `rotYText`.  
+   - **OnScaleChanged:** Cambia la escala uniforme y el texto `scaleText`.  
+   - Cada callback emite un `Debug.Log` con el valor nuevo.  
+7. **Control de animación:**  
+   - **OnToggleAnimation:** Alterna `isAnimating`, actualiza el texto del botón (“Pausar” / “Reanudar”) y el `stateText`, y registra en consola.
 
 **Resultado:**  
-En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
-![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
-
----
+Un objeto “padre” que gira automáticamente y cuyas transformaciones (posición X, rotación Y, escala) pueden ajustarse en tiempo real desde la UI. La jerarquía hace que los objetos “hijo” y “nieto” hereden dichas transformaciones, y el botón permite pausar o reanudar la animación para observar los efectos estáticos.
+![Unity](https://github.com/user-attachments/assets/e6392f09-d635-4bb6-8171-13142d426ecd)
