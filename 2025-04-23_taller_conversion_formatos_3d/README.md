@@ -1,100 +1,144 @@
-# Construyendo el Mundo 3D: Vértices, Aristas y Caras
+**Taller - Importando el Mundo: Visualización y Conversión de Formatos 3D**
 
-## Python: Visualización de Malla 3D con Rotación
+**Fecha**  
+2025-05-05 – Fecha de entrega
 
-**Objetivo:**  
-Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
+**Objetivo del Taller**  
+Cargar, analizar y convertir modelos 3D en distintos formatos (.obj, .stl, .gltf/.glb) usando la librería Trimesh, además de detectar vértices duplicados y generar un resumen tabular de propiedades.
 
-**Técnicas usadas:**
-- Librerías: `trimesh`, `matplotlib`, `numpy`.
-- `Poly3DCollection` para renderizar caras.
-- `scatter` para vértices y `plot` para aristas.
-- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
+**Conceptos Aprendidos**  
+Lista los principales conceptos aplicados:
 
-**Pasos principales:**
-- Definir límites y aspecto de la figura en 3D.
-- `animate(angle)`:
-  - Limpiar y reconfigurar los ejes 3D.
-  - Dibujar:
-    - Caras grises semitransparentes.
-    - Aristas azules.
-    - Vértices rojos.
-- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
-- Guardar como GIF usando `pillow`.
+- Carga de mallas 3D desde múltiples formatos con `trimesh.load`  
+- Unificación de escenas (`Scene`) a un solo `Trimesh` con `concatenate`  
+- Extracción de propiedades: número de vértices, caras y presencia de normales  
+- Detección de vértices duplicados mediante discretización y conteo  
+- Visualización de mallas con `mesh.show()` (Pyglet)  
+- Exportación de mallas a nuevos formatos usando `mesh.export`  
+- Procesamiento por lotes de directorios con Pandas para comparar variantes  
 
-**Resultado:**  
-Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
+**Herramientas y Entornos**  
+Especifica los entornos usados:
 
-![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
----
-## Three.js: Visualización interactiva de malla 3D
+- Python 3.9+ con librerías:  
+  - `trimesh`  
+  - `numpy`  
+  - `pandas`  
+- Ejecución en Jupyter Notebook o script `.py`
 
-**Objetivo:**  
-Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+**Estructura del Proyecto**
+```
+2025-04-23_taller_conversion_formatos_3d/
+├── Python/               
+    ├── Datos/                 
+    ├── Resultados/            
+    ├── Python.ipynb
+├── README.md
+```
+**Implementación**  
 
-**Técnicas usadas:**
-- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
-- **OBJLoader** para importar geometría.
-- **BufferGeometry** y `<points>` para puntos en vértices.
-- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
-- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+**Etapas realizadas**
 
-**Pasos principales:**
-1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
-2. **Carga del modelo**:
-   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
-   - Extraer `geometry` y, en `useEffect`, calcular:
-     - `vertCount = geometry.attributes.position.count`
-     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
-3. **VertexDots**:  
-   - Extraer atributo `position` a un `BufferGeometry` nuevo.
-   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
-4. **ModelEnhanced**:  
-   - Condicionalmente renderizar:
-     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
-     - Aristas (`<Edges>`).
-     - Wireframe (`<Wireframe>`).
-     - Vértices (`<VertexDots>`).
-5. **Escena**:
-   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
-   - Fondo negro (`<color attach="background" args={["#000"]} />`).
-   - `<Suspense>` para carga asíncrona.
-   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
-6. **Estilos CSS**:
-   - Canvas fullscreen.
-   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+1. Definición de función `load_mesh(path)` para cargar y aplanar escenas a `Trimesh`.  
+2. Función `mesh_summary(mesh)` que devuelve número de vértices, caras y si tiene normales.  
+3. Función `count_duplicate_vertices(mesh, tol)` para detectar vértices repetidos dentro de una tolerancia.  
+4. Carga de tres versiones del modelo `ElectricScooter` (.obj, .stl, .gltf), resumen y conteo de duplicados, visualización con `mesh.show()`.  
+5. Función `convert_format(mesh, out_path)` para exportar a nuevos formatos según extensión de destino (obj→stl, obj→glb, etc.).  
+6. Conversión de cada modelo a dos formatos adicionales y almacenamiento en `Resultados/`.  
+7. Verificación cargando un modelo convertido (`OBJ→STL`) y re-ejecutando resumen y duplicados.  
+8. Función `batch_compare(directory)` que recorre un directorio, carga cada archivo 3D, calcula propiedades y devuelve un DataFrame de Pandas.  
+9. Ejecución de `batch_compare` sobre `Datos/` y `Resultados/` para comparar propiedades de todos los archivos.
 
-**Resultado:**  
-Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
-![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
+**Código relevante**
+```python
+import trimesh, numpy as np, os, pandas as pd
+from pathlib import Path
 
----
-## Unity: Importación de OBJ y alternancia de Wireframe
+def load_mesh(path: str) -> trimesh.Trimesh:
+    mesh = trimesh.load(path, force='mesh')
+    if not isinstance(mesh, trimesh.Trimesh):
+        mesh = trimesh.util.concatenate(mesh.dump())
+    return mesh
 
-**Objetivo:**  
-Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+def mesh_summary(mesh: trimesh.Trimesh) -> dict:
+    n_v = len(mesh.vertices)
+    n_f = len(mesh.faces)
+    has_normals = (mesh.vertex_normals is not None and len(mesh.vertex_normals)==n_v)
+    return {'vertices': n_v, 'faces': n_f, 'normals': has_normals}
 
-**Técnicas usadas:**
-- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
-- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
-- **Debug.Log** para imprimir estadísticas en consola.
-- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+def count_duplicate_vertices(mesh: trimesh.Trimesh, tol=1e-8) -> int:
+    verts = mesh.vertices
+    rounded = np.round(verts / tol).astype(np.int64)
+    uniq, counts = np.unique(rounded, axis=0, return_counts=True)
+    duplicates = counts[counts>1].sum() - len(counts[counts>1])
+    return int(duplicates)
 
-**Pasos principales:**
-1. **`Start()`**  
-   - Obtener `MeshFilter` y su `mesh`.  
-   - `Debug.Log` de:  
-     - Vértices: `mesh.vertexCount`  
-     - Caras: `mesh.triangles.Length/3`  
-     - Sub-mallas: `mesh.subMeshCount`  
-   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
-2. **`OnDrawGizmosSelected()`**  
-   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
-3. **`OnPreRender()` / `OnPostRender()`**  
-   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+# Carga y resumen inicial
+mesh_obj = load_mesh('Datos/ElectricScooter.obj')
+print(mesh_summary(mesh_obj), "Dup:", count_duplicate_vertices(mesh_obj))
+mesh_obj.show()
 
-**Resultado:**  
-En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
-![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
+# Conversión de formatos
+def convert_format(mesh, out_path: str):
+    out = Path(out_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    data = mesh.export(file_type=out.suffix.lstrip('.').lower())
+    mode = 'wb' if isinstance(data, (bytes,bytearray)) else 'w'
+    with open(out, mode) as f: f.write(data)
+    print(f"Convertido en {out_path}")
 
----
+convert_format(mesh_obj,  'Resultados/modelo_convertido(OBJ-STL).stl')
+convert_format(mesh_obj,  'Resultados/modelo_convertido(OBJ-GLB).glb')
+# …
+
+# Comparación por lotes
+def batch_compare(directory: str) -> pd.DataFrame:
+    records = []
+    for fname in os.listdir(directory):
+        if fname.lower().endswith(('.obj','.stl','.gltf','.glb','.ply')):
+            mesh = load_mesh(os.path.join(directory, fname))
+            summary = mesh_summary(mesh)
+            summary['duplicates'] = count_duplicate_vertices(mesh)
+            summary['file'] = fname
+            records.append(summary)
+    return pd.DataFrame(records)
+
+df_datos     = batch_compare('Datos')
+df_resultados = batch_compare('Resultados')
+```
+
+**Resultados Visuales**
+
+Tabla Archivos originales:
+
+![image](https://github.com/user-attachments/assets/ebc3a62d-a550-47bb-bfd3-4f7116069237)
+
+Tabla Archivos nuevos:
+
+![image](https://github.com/user-attachments/assets/2091c151-2694-4342-92dc-725135067071)
+
+Modelo Obj:
+
+![Python](https://github.com/user-attachments/assets/c8146e13-75a7-405d-aa0b-74ec93a8a850)
+
+Modelo Stl:
+
+![Python2](https://github.com/user-attachments/assets/88ae1bbd-1824-4c63-82c5-87f899c005eb)
+
+Modelo GLFT:
+
+![Python3](https://github.com/user-attachments/assets/55ee01ee-e603-4bd6-bbcd-6d2646592e7e)
+
+
+## Reflexión Final
+
+Trabajar con Trimesh facilita la gestión de múltiples formatos 3D y la extracción de métricas geométricas. La detección de vértices duplicados ayuda a optimizar la malla antes de usarse en motores de renderizado o simulación. En futuros ejercicios, exploraría operaciones de simplificación de mallas (mesh.simplify_quadratic_decimation) y análisis de propiedades topológicas más avanzadas.
+
+## Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
