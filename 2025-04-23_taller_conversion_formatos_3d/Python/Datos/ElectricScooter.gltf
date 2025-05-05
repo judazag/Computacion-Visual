@@ -1,0 +1,170 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5125,
+      "count": 7068,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 2479,
+      "max": [
+        17.6125144958496,
+        44.344799041748,
+        9.69413089752197
+      ],
+      "min": [
+        -23.2305641174316,
+        0.344900131225586,
+        -8.20556926727295
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 2479,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 2479,
+      "type": "VEC2"
+    }
+  ],
+  "asset": {
+    "generator": "Substance Painter 6.2.2",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 28272,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 29748,
+      "byteOffset": 28272,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 29748,
+      "byteOffset": 58020,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 19832,
+      "byteOffset": 87768,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 107600,
+      "uri": "ElectricScooter.bin"
+    }
+  ],
+  "images": [
+    {
+      "uri": "ElectricScooter_baseColor.png"
+    },
+    {
+      "uri": "ElectricScooter_occlusionRoughnessMetallic.png"
+    },
+    {
+      "uri": "ElectricScooter_normal.png"
+    }
+  ],
+  "materials": [
+    {
+      "alphaMode": "OPAQUE",
+      "name": "ElectricScooter",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "ElectricScooter",
+      "primitives": [
+        {
+          "attributes": {
+            "NORMAL": 2,
+            "POSITION": 1,
+            "TEXCOORD_0": 3
+          },
+          "indices": 0,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "children": [
+        1
+      ],
+      "name": "root"
+    },
+    {
+      "children": [
+        2
+      ],
+      "name": "ElectricScooter"
+    },
+    {
+      "mesh": 0,
+      "name": "ElectricScooter"
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9985,
+      "wrapS": 10497,
+      "wrapT": 10497
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
+    }
+  ]
+}
