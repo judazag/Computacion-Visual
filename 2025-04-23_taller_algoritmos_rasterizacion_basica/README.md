@@ -1,100 +1,140 @@
-# Construyendo el Mundo 3D: Vértices, Aristas y Caras
+**Taller - Rasterización desde Cero: Dibujando con Algoritmos Clásicos**
 
-## Python: Visualización de Malla 3D con Rotación
+**Fecha**  
+2025-05-05 – Fecha de entrega
 
-**Objetivo:**  
-Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
+**Objetivo del Taller**  
+Implementar algoritmos clásicos de rasterización (línea, círculo y relleno de triángulo) para comprender la representación discreta de formas en una trama de píxeles.
 
-**Técnicas usadas:**
-- Librerías: `trimesh`, `matplotlib`, `numpy`.
-- `Poly3DCollection` para renderizar caras.
-- `scatter` para vértices y `plot` para aristas.
-- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
+**Conceptos Aprendidos**  
+Lista los principales conceptos aplicados:
 
-**Pasos principales:**
-- Definir límites y aspecto de la figura en 3D.
-- `animate(angle)`:
-  - Limpiar y reconfigurar los ejes 3D.
-  - Dibujar:
-    - Caras grises semitransparentes.
-    - Aristas azules.
-    - Vértices rojos.
-- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
-- Guardar como GIF usando `pillow`.
+- Algoritmo de Bresenham para trazado de líneas  
+- Algoritmo Midpoint para rasterización de círculos  
+- Interpolación de bordes y escaneo de líneas para relleno de triángulos  
+- Manipulación directa de píxeles con PIL (`Image.load()`)  
+- Visualización de imágenes con Matplotlib  
 
-**Resultado:**  
-Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
 
-![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
----
-## Three.js: Visualización interactiva de malla 3D
+**Herramientas y Entornos**  
+Especifica los entornos usados:
 
-**Objetivo:**  
-Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+- Python 3.9+ con librerías:  
+  - `Pillow`  
+  - `matplotlib`  
+- Entorno Jupyter Notebook / Google Colab
 
-**Técnicas usadas:**
-- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
-- **OBJLoader** para importar geometría.
-- **BufferGeometry** y `<points>` para puntos en vértices.
-- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
-- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+**Estructura del Proyecto**
+```
+2025-04-21_taller_ojos_digitales/
+├── Python/
+    ├── Resultados                                      
+    ├── Python.ipynb
+├── README.md
+```
+**Implementación**  
 
-**Pasos principales:**
-1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
-2. **Carga del modelo**:
-   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
-   - Extraer `geometry` y, en `useEffect`, calcular:
-     - `vertCount = geometry.attributes.position.count`
-     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
-3. **VertexDots**:  
-   - Extraer atributo `position` a un `BufferGeometry` nuevo.
-   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
-4. **ModelEnhanced**:  
-   - Condicionalmente renderizar:
-     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
-     - Aristas (`<Edges>`).
-     - Wireframe (`<Wireframe>`).
-     - Vértices (`<VertexDots>`).
-5. **Escena**:
-   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
-   - Fondo negro (`<color attach="background" args={["#000"]} />`).
-   - `<Suspense>` para carga asíncrona.
-   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
-6. **Estilos CSS**:
-   - Canvas fullscreen.
-   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+**Etapas realizadas**
 
-**Resultado:**  
-Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
-![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
+1. Creación de lienzo en blanco de 200×200 píxeles con fondo blanco.  
+2. Implementación de `bresenham(x0, y0, x1, y1)` para dibujar líneas rojas.  
+3. Implementación de `midpoint_circle(x0, y0, radius)` para dibujar círculos azules.  
+4. Función `fill_triangle(p1, p2, p3)` para rellenar triángulos verdes usando escaneo por filas e interpolación.  
+5. Llamada a los tres algoritmos en posiciones y tamaños definidos.  
+6. Visualización final con Matplotlib.
 
----
-## Unity: Importación de OBJ y alternancia de Wireframe
 
-**Objetivo:**  
-Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+**Código relevante**
+```python
+```python
+from PIL import Image
+import matplotlib.pyplot as plt
 
-**Técnicas usadas:**
-- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
-- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
-- **Debug.Log** para imprimir estadísticas en consola.
-- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+# 1. Crear lienzo
+width, height = 200, 200
+image = Image.new('RGB', (width, height), 'white')
+pixels = image.load()
 
-**Pasos principales:**
-1. **`Start()`**  
-   - Obtener `MeshFilter` y su `mesh`.  
-   - `Debug.Log` de:  
-     - Vértices: `mesh.vertexCount`  
-     - Caras: `mesh.triangles.Length/3`  
-     - Sub-mallas: `mesh.subMeshCount`  
-   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
-2. **`OnDrawGizmosSelected()`**  
-   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
-3. **`OnPreRender()` / `OnPostRender()`**  
-   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+# 2. Bresenham
+def bresenham(x0, y0, x1, y1):
+    dx, dy = abs(x1-x0), abs(y1-y0)
+    sx, sy = (1 if x0<x1 else -1), (1 if y0<y1 else -1)
+    err = dx - dy
+    while True:
+        pixels[x0, y0] = (255,0,0)
+        if x0==x1 and y0==y1: break
+        e2 = 2*err
+        if e2 > -dy:
+            err -= dy; x0 += sx
+        if e2 < dx:
+            err += dx; y0 += sy
 
-**Resultado:**  
-En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
-![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
+bresenham(20, 20, 180, 120)
 
----
+# 3. Midpoint Circle
+def midpoint_circle(x0, y0, radius):
+    x, y, p = radius, 0, 1-radius
+    while x>=y:
+        for dx, dy in [(x,y),(y,x),(-x,y),(-y,x),(-x,-y),(-y,-x),(x,-y),(y,-x)]:
+            if 0<=x0+dx<width and 0<=y0+dy<height:
+                pixels[x0+dx, y0+dy] = (0,0,255)
+        y += 1
+        if p <= 0:
+            p += 2*y + 1
+        else:
+            x -= 1
+            p += 2*y - 2*x + 1
+
+midpoint_circle(100, 100, 40)
+
+# 4. Relleno de triángulo
+def fill_triangle(p1, p2, p3):
+    pts = sorted([p1,p2,p3], key=lambda p:p[1])
+    (x1,y1),(x2,y2),(x3,y3) = pts
+    def interpolate(y0,y1,x0,x1):
+        return [] if y1==y0 else [int(x0 + (x1-x0)*(y-y0)/(y1-y0)) for y in range(y0,y1)]
+    x12 = interpolate(y1,y2,x1,x2)
+    x23 = interpolate(y2,y3,x2,x3)
+    x13 = interpolate(y1,y3,x1,x3)
+    x_left = x12 + x23
+    for y, xl, xr in zip(range(y1,y3), x13, x_left):
+        for x in range(min(xl,xr), max(xl,xr)):
+            if 0<=x<width and 0<=y<height:
+                pixels[x,y] = (0,255,0)
+
+fill_triangle((30,50),(100,150),(160,60))
+
+# 5. Mostrar resultado
+plt.imshow(image)
+plt.axis('off')
+plt.show()
+```
+
+**Resultados Visuales**
+
+Bresenham:
+
+![Bresenham](https://github.com/user-attachments/assets/a0a80cfa-31eb-42c9-b5dd-af196e380c34)
+
+Circle:
+
+![Circle](https://github.com/user-attachments/assets/553acb38-09ed-42d3-9eeb-a15acdba2a5c)
+
+Triangle:
+
+![Triangle](https://github.com/user-attachments/assets/36670afb-9be6-4790-8303-23c3764eb6ab)
+
+
+
+## Reflexión Final
+
+Este taller me permitió entender cómo los algoritmos discretos aproximan formas geométricas continuas en un grid de píxeles. Bresenham ofrece eficiencia en la línea, Midpoint simplifica el trazo de círculos y el escaneo por filas facilita el relleno de polígonos básicos. Para futuros proyectos, exploraría algoritmos de rasterización de polígonos más complejos y antialiasing.
+
+## Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
