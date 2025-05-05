@@ -31,7 +31,7 @@ Especifica los entornos usados:
 
 **Estructura del Proyecto**
 ```
-2025-04-21_taller_ojos_digitales/
+2025-04-21_taller_segmentacion_formas/
 ├── Python/                              
     ├── Resultados/            
     ├── Python.ipynb
