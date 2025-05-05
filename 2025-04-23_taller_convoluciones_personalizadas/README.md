@@ -1,100 +1,194 @@
-# Construyendo el Mundo 3D: Vértices, Aristas y Caras
+**Taller - Filtro Visual: Convoluciones Personalizadas**
 
-## Python: Visualización de Malla 3D con Rotación
+**Fecha**  
+2025-05-05 – Fecha de entrega
 
-**Objetivo:**  
-Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
+**Objetivo del Taller**  
+Implementar filtros espaciales (suavizado, realce, detección de bordes y esquinas) de forma manual mediante convolución 2D y compararlos con la versión de OpenCV. Además, construir una interfaz interactiva para diseñar kernels personalizados en tiempo real.
 
-**Técnicas usadas:**
-- Librerías: `trimesh`, `matplotlib`, `numpy`.
-- `Poly3DCollection` para renderizar caras.
-- `scatter` para vértices y `plot` para aristas.
-- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
+**Conceptos Aprendidos**  
+Lista los principales conceptos aplicados:
 
-**Pasos principales:**
-- Definir límites y aspecto de la figura en 3D.
-- `animate(angle)`:
-  - Limpiar y reconfigurar los ejes 3D.
-  - Dibujar:
-    - Caras grises semitransparentes.
-    - Aristas azules.
-    - Vértices rojos.
-- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
-- Guardar como GIF usando `pillow`.
+- Conversión manual a escala de grises promediando canales RGB  
+- Convolución 2D implementada desde cero con padding  
+- Filtros clásicos: Sharpen, Blur, Sobel (magnitud y esquinas)  
+- Normalización de resultados y conversión a `uint8`  
+- Uso de `cv2.filter2D` para comparación con implementaciones manuales  
+- Creación de ventanas y trackbars en OpenCV para kernels interactivos  
+- Guardado de resultados estáticos e interactivos
+ 
 
-**Resultado:**  
-Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
+**Herramientas y Entornos**  
+Especifica los entornos usados:
 
-![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
----
-## Three.js: Visualización interactiva de malla 3D
+- Python 3.9+ con librerías:  
+  - `opencv-python`  
+  - `numpy`  
+  - `matplotlib`  
+- Ejecución local con cámara desactivada (solo lectura de imagen)  
+- Jupyter Notebook o script `.py`
 
-**Objetivo:**  
-Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+**Estructura del Proyecto**
+```
+2025-04-23_taller_convoluciones_personalizadas/
+├── Python/               
+    ├── Datos/                 
+    ├── Resultados/            
+    ├── Python.ipynb
+├── README.md
+```
+**Implementación**  
 
-**Técnicas usadas:**
-- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
-- **OBJLoader** para importar geometría.
-- **BufferGeometry** y `<points>` para puntos en vértices.
-- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
-- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+**Etapas realizadas**
 
-**Pasos principales:**
-1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
-2. **Carga del modelo**:
-   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
-   - Extraer `geometry` y, en `useEffect`, calcular:
-     - `vertCount = geometry.attributes.position.count`
-     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
-3. **VertexDots**:  
-   - Extraer atributo `position` a un `BufferGeometry` nuevo.
-   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
-4. **ModelEnhanced**:  
-   - Condicionalmente renderizar:
-     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
-     - Aristas (`<Edges>`).
-     - Wireframe (`<Wireframe>`).
-     - Vértices (`<VertexDots>`).
-5. **Escena**:
-   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
-   - Fondo negro (`<color attach="background" args={["#000"]} />`).
-   - `<Suspense>` para carga asíncrona.
-   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
-6. **Estilos CSS**:
-   - Canvas fullscreen.
-   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+1. Creación de carpeta `Resultados`.  
+2. Función `mostrar_y_guardar` para visualización con Matplotlib y guardado con OpenCV.  
+3. Lectura de imagen `Datos/TBOI.jpg`, conversión BGR→RGB y guardado del original.  
+4. Conversión manual a escala de grises promediando canales RGB.  
+5. Implementación de `convolucion2d()` desde cero (padding, flipping del kernel, sumas de región).  
+6. Definición de kernels: Sharpen, Blur, Sobel X/Y.  
+7. Aplicación de filtros manuales:  
+   - `Sharpen`, `Blur`, magnitud de Sobel (`SobelMag`), detección de esquinas (`Corners`).  
+   - Normalización y guardado de cada resultado.  
+8. Aplicación de `cv2.filter2D` para cada kernel clásico y comparación.  
+9. Construcción de ventana interactiva con 9 trackbars para ajustar elementos de un kernel 3×3 en tiempo real.  
+10. En bucle: lectura de sliders, construcción de kernel, filtrado con OpenCV, visualización de original y filtrado, guardado de capturas con tecla `s`, salida con `Esc`.
 
-**Resultado:**  
-Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
-![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
 
----
-## Unity: Importación de OBJ y alternancia de Wireframe
+**Código relevante**
+```python
+import cv2, numpy as np, os, datetime
+import matplotlib.pyplot as plt
 
-**Objetivo:**  
-Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+# 1-2. Carpeta y función de visualización
+output_dir = 'Resultados'
+os.makedirs(output_dir, exist_ok=True)
+def mostrar_y_guardar(img, titulo='', nombre_archivo=None, cmap='gray'):
+    if nombre_archivo:
+        path = os.path.join(output_dir, nombre_archivo)
+        cv2.imwrite(path, img if cmap is None else img)
+        print(f"Guardada: {path}")
+    plt.figure(figsize=(6,6))
+    plt.title(titulo); plt.axis('off'); plt.imshow(img, cmap=cmap)
+    plt.show()
 
-**Técnicas usadas:**
-- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
-- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
-- **Debug.Log** para imprimir estadísticas en consola.
-- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+# 3-4. Lectura y gris manual
+ruta = 'Datos/TBOI.jpg'
+img = cv2.cvtColor(cv2.imread(ruta), cv2.COLOR_BGR2RGB)
+mostrar_y_guardar(img, 'Original', 'original.png', cmap=None)
+def a_grises_manual(im): return np.mean(im, axis=2).astype(np.uint8)
+gris = a_grises_manual(img)
+mostrar_y_guardar(gris, 'Gris Manual', 'gris_manual.png')
 
-**Pasos principales:**
-1. **`Start()`**  
-   - Obtener `MeshFilter` y su `mesh`.  
-   - `Debug.Log` de:  
-     - Vértices: `mesh.vertexCount`  
-     - Caras: `mesh.triangles.Length/3`  
-     - Sub-mallas: `mesh.subMeshCount`  
-   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
-2. **`OnDrawGizmosSelected()`**  
-   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
-3. **`OnPreRender()` / `OnPostRender()`**  
-   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+# 5. Convolución 2D
+def convolucion2d(im, k):
+    h,w = im.shape; kh,kw = k.shape
+    pad = ((kh//2,),(kw//2,))
+    im_p = np.pad(im, pad, 'constant', constant_values=0)
+    ek = np.flipud(np.fliplr(k))
+    out = np.zeros_like(im, dtype=float)
+    for i in range(h):
+        for j in range(w):
+            out[i,j] = np.sum(im_p[i:i+kh, j:j+kw]*ek)
+    return out
 
-**Resultado:**  
-En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
-![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
+# 6. Kernels
+kernels = {
+    'Sharpen': np.array([[0,-1,0],[-1,5,-1],[0,-1,0]]),
+    'Blur':    np.ones((3,3))/9.0,
+    'SobelX':  np.array([[-1,0,1],[-2,0,2],[-1,0,1]]),
+    'SobelY':  np.array([[-1,-2,-1],[0,0,0],[1,2,1]])
+}
 
----
+# 7. Filtros manuales
+def norm_uint8(x): return cv2.normalize(x, None, 0,255,cv2.NORM_MINMAX).astype(np.uint8)
+for name,k in kernels.items():
+    conv = convolucion2d(gris.astype(float), k)
+    img_u = norm_uint8(conv)
+    mostrar_y_guardar(img_u, f'Manual {name}', f'manual_{name.lower()}.png')
+
+# 8. Filtros OpenCV
+for name,k in kernels.items():
+    res = cv2.filter2D(gris, -1, k)
+    mostrar_y_guardar(res, f'OpenCV {name}', f'opencv_{name.lower()}.png')
+
+# 9-10. Interactivo
+names = ['Top-Left','Top-Center','Top-Right','Mid-Left','Mid-Center','Mid-Right','Bot-Left','Bot-Center','Bot-Right']
+cv2.namedWindow('Interactive Filter')
+for nm in names: cv2.createTrackbar(nm,'Interactive Filter',5,10,lambda x:None)
+
+while True:
+    vals = [cv2.getTrackbarPos(n,'Interactive Filter')-5 for n in names]
+    k = np.array(vals).reshape((3,3))
+    filt = cv2.filter2D(gris, -1, k)
+    cv2.imshow('Original', gris)
+    cv2.imshow('Interactive Filter', filt)
+    key = cv2.waitKey(1)
+    if key==ord('s'):
+        ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        fn = f'interactive_{ts}.png'
+        cv2.imwrite(os.path.join(output_dir, fn), filt)
+        print(f"Guardada: {fn}")
+    elif key==27:
+        break
+cv2.destroyAllWindows()
+```
+
+**Resultados Visuales**
+
+Imagen usada:
+
+![TBOI](https://github.com/user-attachments/assets/6b4a92fa-1a34-460c-9e5a-9ef1c75a443a)
+
+Gris Manual:
+
+![gris_manual](https://github.com/user-attachments/assets/999c9c77-a31d-4b29-8e53-c6196c2e834a)
+
+Blur manual:
+
+![manual_blur](https://github.com/user-attachments/assets/eb8988fd-6400-4ce2-bdc1-b0ebaac635eb)
+
+corners manual:
+
+![manual_corners](https://github.com/user-attachments/assets/bebaba78-d8e4-46de-b043-f54d42490019)
+
+sharpen manual:
+
+![manual_sharpen](https://github.com/user-attachments/assets/65c0cd90-8daa-4810-a74f-d7a511248278)
+
+sobelmag manual:
+
+![manual_sobelmag](https://github.com/user-attachments/assets/b0d547c7-a25a-44b6-a282-13e6be9af758)
+
+blur opencv:
+
+![opencv_blur](https://github.com/user-attachments/assets/8a2b510f-60ff-41c1-9523-8cdf89183354)
+
+sharpen opencv:
+
+![opencv_sharpen](https://github.com/user-attachments/assets/126b07a9-9ba0-40f9-ad56-23d30d769877)
+
+sobelx opencv:
+
+![opencv_sobelx](https://github.com/user-attachments/assets/f51ffe65-c4a3-465d-8382-0d30f646a737)
+
+sobely opencv:
+
+![opencv_sobely](https://github.com/user-attachments/assets/2d6a5388-9988-4e70-9bed-2bc6be3b02fc)
+
+Cambios en tiempo real:
+
+![Python](https://github.com/user-attachments/assets/47c92bad-e1e7-41fc-a684-55a030625a0c)
+
+## Reflexión Final
+
+Desarrollar la convolución 2D manual refuerza la comprensión de padding, flipping de kernels y normalización de valores. El módulo de OpenCV acelera estos procesos. La interfaz interactiva muestra cómo pequeños cambios en los valores del kernel afectan el filtrado. Para proyectos futuros, exploraría filtros adaptativos y técnicas de optimización de convolución (por ejemplo, FFT).
+
+## Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
