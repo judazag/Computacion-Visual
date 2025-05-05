@@ -1,100 +1,143 @@
-# Construyendo el Mundo 3D: Vértices, Aristas y Caras
+**Taller - Ojos Digitales: Introducción a la Visión Artificial**
 
-## Python: Visualización de Malla 3D con Rotación
+**Fecha**  
+2025-05-05 – Fecha de entrega
 
-**Objetivo:**  
-Mostrar una malla 3D rotando, resaltando vértices, aristas y caras.
+**Objetivo del Taller**  
+Explorar técnicas básicas de procesamiento de imágenes utilizando OpenCV y NumPy, aplicando filtros de suavizado, realce y detección de bordes para comprender la manipulación de píxeles y la convolución.
 
-**Técnicas usadas:**
-- Librerías: `trimesh`, `matplotlib`, `numpy`.
-- `Poly3DCollection` para renderizar caras.
-- `scatter` para vértices y `plot` para aristas.
-- `FuncAnimation` de `matplotlib.animation` para animar la rotación.
+**Conceptos Aprendidos**  
+Lista los principales conceptos aplicados:
 
-**Pasos principales:**
-- Definir límites y aspecto de la figura en 3D.
-- `animate(angle)`:
-  - Limpiar y reconfigurar los ejes 3D.
-  - Dibujar:
-    - Caras grises semitransparentes.
-    - Aristas azules.
-    - Vértices rojos.
-- Usar `FuncAnimation` para crear una rotación continua de 0° a 360°.
-- Guardar como GIF usando `pillow`.
+- Transformaciones de espacio de color (RGB a escala de grises)  
+- Convolución manual y kernels personalizados  
+- Filtros de suavizado (Blur manual y Gaussian Blur)  
+- Técnicas de realce (Sharpening manual y Unsharp Mask)  
+- Detección de bordes (Sobel X, Sobel Y, combinado y Laplaciano)  
+- Guardado masivo de resultados en directorios  
 
-**Resultado:**  
-Una animación GIF de la malla 3D donde se aprecian claramente **vértices, aristas y caras**, con rotación suave y continua.
+**Herramientas y Entornos**  
+Especifica los entornos usados:
 
-![rotacion_malla_completa](https://github.com/user-attachments/assets/2879dd03-5beb-4e17-aa88-c6cf84ac27c5)
----
-## Three.js: Visualización interactiva de malla 3D
+- Python 3.9+ con librerías:  
+  - `opencv-python`  
+  - `numpy`  
+  - `matplotlib`  
+- Entorno Jupyter Notebook / Google Colab  
 
-**Objetivo:**  
-Cargar y mostrar un modelo OBJ permitiendo alternar entre malla, aristas, wireframe y vértices, además de mostrar conteos de vértices y caras.
+**Estructura del Proyecto**
+```
+2025-04-21_taller_ojos_digitales/
+├── Python/               
+    ├── Datos/                 
+    ├── Resultados/            
+    ├── Python.ipynb
+    ├── PythonBonus.ipynb
+├── README.md
+```
+**Implementación**  
 
-**Técnicas usadas:**
-- **React + @react-three/fiber** y **@react-three/drei** (Canvas, OrbitControls, Suspense).
-- **OBJLoader** para importar geometría.
-- **BufferGeometry** y `<points>` para puntos en vértices.
-- Componentes `<Edges>` y `<Wireframe>` para aristas y malla de alambre.
-- **State hooks** (`useState`, `useEffect`) para toggles y conteo dinámico.
+**Etapas realizadas**
 
-**Pasos principales:**
-1. **UI Panel**: Crear checkboxes (`showMesh`, `showEdges`, `showWireframe`, `showVertices`) y mostrar `modelInfo` (vértices, caras).
-2. **Carga del modelo**:
-   - `useLoader(OBJLoader, '/Low-Poly Plant_.obj')`
-   - Extraer `geometry` y, en `useEffect`, calcular:
-     - `vertCount = geometry.attributes.position.count`
-     - `faceCount = geometry.index ? geometry.index.count/3 : vertCount/3`
-3. **VertexDots**:  
-   - Extraer atributo `position` a un `BufferGeometry` nuevo.
-   - Renderizar con `<pointsMaterial size={0.05} color="yellow" />`.
-4. **ModelEnhanced**:  
-   - Condicionalmente renderizar:
-     - Malla básica (`<mesh>` + `<meshBasicMaterial>`).
-     - Aristas (`<Edges>`).
-     - Wireframe (`<Wireframe>`).
-     - Vértices (`<VertexDots>`).
-5. **Escena**:
-   - `<Canvas dpr={[1,2]} camera={{position:[0,1,5], fov:60}}>`
-   - Fondo negro (`<color attach="background" args={["#000"]} />`).
-   - `<Suspense>` para carga asíncrona.
-   - `<OrbitControls enableDamping dampingFactor={0.1} />` para interacción.
-6. **Estilos CSS**:
-   - Canvas fullscreen.
-   - `.ui-panel` y `.info-panel`: paneles flotantes semitransparentes con blur y diseño responsive.
+1. Carga de la imagen en BGR y conversión a RGB.  
+2. Conversión a escala de grises.  
+3. Aplicación de filtros de suavizado:  
+   - Blur manual con kernel 3×3  
+   - Gaussian Blur (7×7, σ=1.5)  
+4. Realce de detalles:  
+   - Sharpening manual  
+   - Unsharp Mask (9×9, σ=2)  
+5. Detección de bordes:  
+   - Sobel en X y Y sobre imagen suavizada  
+   - Combinación de Sobel  
+   - Laplaciano de segunda derivada  
+6. Visualización de resultados individuales y en cuadrícula.  
+7. Guardado de todas las imágenes procesadas en `resultados/`.
 
-**Resultado:**  
-Una aplicación web donde el usuario puede **alternar la visualización** de diferentes componentes de la malla 3D, **ver estadísticas** en tiempo real, y **navegar** la escena con controles orbitales.
-![Threejs](https://github.com/user-attachments/assets/9ac12d39-d1ae-420f-bb31-2bdb8f9bbd78)
+**Código relevante**
+```python
+import cv2, numpy as np, os
+import matplotlib.pyplot as plt
 
----
-## Unity: Importación de OBJ y alternancia de Wireframe
+def show_image(img, title='', cmap=None):
+    plt.figure(figsize=(6,6))
+    plt.imshow(img, cmap=cmap)
+    plt.title(title)
+    plt.axis('off')
+    plt.show()
 
-**Objetivo:**  
-Cargar un modelo `.OBJ`, mostrar información de su malla y permitir alternar entre vista sólida y alambre.
+# Carga y conversiones
+img_bgr = cv2.imread('Datos/Payday2.jpg')
+img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+show_image(img_rgb, 'Original (RGB)')
+gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
 
-**Técnicas usadas:**
-- **UI Buttons** (`UnityEngine.UI.Button`) para toggles.
-- **MeshFilter** para obtener `Mesh` y acceder a `vertexCount`, `triangles` y `subMeshCount`.
-- **Debug.Log** para imprimir estadísticas en consola.
-- **Gizmos.DrawWireMesh** y **GL.wireframe** para renderizar wireframe en modo edición y Play.
+# Blur manual vs Gaussian
+kernel = np.ones((3,3), np.float32)/9
+blur_manual = cv2.filter2D(gray, -1, kernel)
+blur_gauss = cv2.GaussianBlur(gray, (7,7), 1.5)
 
-**Pasos principales:**
-1. **`Start()`**  
-   - Obtener `MeshFilter` y su `mesh`.  
-   - `Debug.Log` de:  
-     - Vértices: `mesh.vertexCount`  
-     - Caras: `mesh.triangles.Length/3`  
-     - Sub-mallas: `mesh.subMeshCount`  
-   - Asignar `onClick` a `wireframeButton` y `solidButton` para alternar `showWireframe`.
-2. **`OnDrawGizmosSelected()`**  
-   - Si `showWireframe` es `true`, usar `Gizmos.color` y `Gizmos.DrawWireMesh(mesh)` con la matriz de transformación del objeto.
-3. **`OnPreRender()` / `OnPostRender()`**  
-   - En Play, activar/desactivar `GL.wireframe` antes y después del render para mostrar wireframe en tiempo real.
+# Sharpening y Unsharp Mask
+kernel_sharp = np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
+sharp_manual = cv2.filter2D(gray, -1, kernel_sharp)
+blur_for_unsharp = cv2.GaussianBlur(gray, (9,9), 2)
+unsharp = cv2.addWeighted(gray,1.5, blur_for_unsharp,-0.5,0)
+```
 
-**Resultado:**  
-En la escena 3D el usuario puede pulsar botones para ver el modelo en **wireframe verde** o en modo sólido, y obtiene en consola datos de vértices, caras y sub-mallas.
-![Unity](https://github.com/user-attachments/assets/d2a1691c-1e80-4383-b848-78be7c7be76d)
+**Resultados Visuales**
 
----
+Imagen usada:
+
+![Payday2](https://github.com/user-attachments/assets/ee9e1673-7c04-4444-8146-43f63b392b73)
+
+Conversiones:
+
+unsharp_mask
+
+![unsharp_mask](https://github.com/user-attachments/assets/3be14bd3-afb3-4080-b111-54c69e177992)
+
+sobel_y
+
+![sobel_y](https://github.com/user-attachments/assets/a2b4f2ab-fb86-48d6-a298-737f328f399b)
+
+sobel_xy
+
+![sobel_xy](https://github.com/user-attachments/assets/44dcb82e-e445-4f6d-8401-decfe50d163a)
+
+sobel_x
+
+![sobel_x](https://github.com/user-attachments/assets/b2704502-8f87-40ca-8a9d-c0314c15c33f)
+
+sharpening_manual
+
+![sharpening_manual](https://github.com/user-attachments/assets/4b52c6a2-beb1-47f6-8117-f8ef07d21e09)
+
+laplacian
+
+![laplacian](https://github.com/user-attachments/assets/6f5986d7-fbcb-4284-843d-c6e3a50a1443)
+
+grayscale
+
+![grayscale](https://github.com/user-attachments/assets/538da87a-cea9-47c7-911a-2ca60cf54e14)
+
+gaussian_blur
+
+![gaussian_blur](https://github.com/user-attachments/assets/9519c264-bedd-473e-9688-a99771fe17f6)
+
+blur_manual
+
+![blur_manual](https://github.com/user-attachments/assets/24648a2e-1f9c-4f72-8ddf-3e88d9a66fbd)
+
+
+## Reflexión Final
+
+Con este taller reforcé cómo funcionan las operaciones de convolución y la importancia del diseño de kernels para suavizar o realzar imágenes. La parte más compleja fue entender el balance de pesos en la máscara de Unsharp Mask para evitar artefactos. En proyectos futuros, exploraría filtros no lineales como Median Blur y técnicas más avanzadas de detección de bordes.
+
+## Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
