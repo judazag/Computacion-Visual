@@ -30,7 +30,7 @@ Especifica los entornos usados:
 
 **Estructura del Proyecto**
 ```
-2025-04-21_taller_ojos_digitales/
+2025-04-23_taller_analisis_figuras_geometricas/
 ├── Python/               
     ├── Datos/                 
     ├── Resultados/            
