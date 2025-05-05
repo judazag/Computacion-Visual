@@ -26,7 +26,7 @@ Especifica los entornos usados:
 
 **Estructura del Proyecto**
 ```
-2025-04-21_taller_ojos_digitales/
+2025-04-23_taller_algoritmos_rasterizacion_basica/
 ├── Python/
     ├── Resultados                                      
     ├── Python.ipynb
