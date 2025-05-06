@@ -1,62 +1,274 @@
-# Taller Jerarquias Transformaciones
 
-## Threejs:
+**Taller - Jerarquías y Transformaciones: El Árbol del Movimiento**
 
-**Objetivo:**  
-Mostrar cómo controlar de forma interactiva, mediante sliders, las transformaciones (rotación en Y y desplazamiento en X) de tres niveles de grupos jerárquicos (abuelo, padre e hijo) en una escena 3D con React-Three-Fiber y Leva.
+**Fecha**  
+2025-05-05 – Fecha de entrega
 
-**Técnicas usadas:**  
-- `react-three-fiber` para enlazar Three.js con React.  
-- `useRef` para referenciar cada grupo en la jerarquía.  
-- `useFrame` para aplicar en cada cuadro los valores de rotación y posición.  
-- `Leva` (`useControls`) para crear sliders que modifiquen dinámicamente esos valores.
+**Objetivo del Taller**  
+Explorar el uso de transformaciones jerárquicas (grupo–subgrupo–subsubgrupo) en una escena 3D.
 
-**Pasos principales:**  
-- Definir refs para los tres grupos (`abuelo`, `padre`, `hijo`).  
-- Configurar sliders en Leva con rangos para rotación Y y posición X.  
-- En el bucle de render (`useFrame`), asignar los valores de los sliders a `rotation.y` y `position.x` de cada ref.  
-- Anidar los grupos de mayor a menor nivel y añadir tres mallas (cubo, esfera y cono) dentro del grupo “hijo” para visualizar el efecto jerárquico.  
-- Renderizar la escena con `<Canvas>` y luces (ambiental y direccional).
+**Conceptos Aprendidos**  
+Lista los principales conceptos aplicados:
 
-**Resultado:**  
-Una escena 3D interactiva donde, al mover cada slider, se gira o desplaza el grupo correspondiente. Las transformaciones del “abuelo” afectan al “padre” y al “hijo”.
+Threejs:
+
+- Estructura de nodos en Three.js (`<group>`) para jerarquías de transformaciones  
+- Uso de `useRef` para referenciar grupos y modificar transformaciones en tiempo real  
+- Hooks de React Three Fiber (`useFrame`) para actualizar cada frame  
+- Panel de control Leva (`useControls`, `<Leva />`) para generar sliders automáticamente  
+- Transformaciones independientes en niveles “abuelo”, “padre” e “hijo” (rotación y traslación)  
+- Composición de mallas (`boxGeometry`, `sphereGeometry`, `coneGeometry`) bajo la misma jerarquía  
+
+Unity:
+
+- Acceso a componentes (`MeshFilter`, `Mesh`) y sus propiedades (`vertexCount`, `triangles`, `subMeshCount`)  
+- Configuración de eventos UI: `Button.onClick.AddListener`  
+- Debugging con `Debug.Log` para mostrar datos de malla  
+- Uso de Gizmos para dibujar wireframe en modo edición (`OnDrawGizmosSelected`, `Gizmos.DrawWireMesh`)  
+- Renderizado en modo wireframe en Play Mode con `GL.wireframe` (activar/desactivar en `OnPreRender`/`OnPostRender`)  
+
+**Herramientas y Entornos**  
+Especifica los entornos usados:
+
+Threejs:
+- Node.js 14+ / npm o Yarn  
+- React 18+  
+- `@react-three/fiber`  
+- `leva` (para UI de sliders)  
+
+Unity:
+- Unity 2021 LTS o superior  
+- UI Toolkit tradicional con `Canvas`, `Button`  
+- Lenguaje C#    
+
+**Estructura del Proyecto**
+```
+2025-04-21_taller_jerarquias_transformaciones/
+├── Threejs/
+├── Unity/ 
+├── README.md
+```
+**Implementación**  
+
+**Etapas realizadas**
+
+Threejs:
+1. Configurar panel Leva con `useControls` agrupando seis sliders para rotación Y (`gRotY`, `pRotY`, `cRotY`) y traslación X (`gPosX`, `pPosX`, `cPosX`).
+2. Crear referencias `refG`, `refP`, `refC` con `useRef()` para los grupos de “abuelo”, “padre” e “hijo”.
+3. Actualizar transformaciones en `useFrame`:
+   - Nivel abuelo: rotación Y = `gRotY`, posición X = `gPosX`.
+   - Nivel padre: rotación Y = `pRotY`, posición X = `pPosX`.
+   - Nivel hijo: rotación Y = `cRotY`, posición X = `cPosX`.
+4. Definir jerarquía de grupos:
+   - `<group ref={refG} name="abuelo">`
+     - `<group ref={refP} name="padre">`
+       - `<group ref={refC} name="hijo">` contiene tres mallas:
+         - Cubo (`boxGeometry`) en x = –1
+         - Esfera (`sphereGeometry`) en origen
+         - Cono (`coneGeometry`) en x = +1  
+5. Renderizar `Canvas` con una cámara inicial y luces (`ambientLight`, `directionalLight`).
+
+**Código relevante**
+```javascrit
+export default function ThreeLevelGroup() {
+  const refG = useRef()
+  const refP = useRef()
+  const refC = useRef()
+
+  const { gRotY, gPosX, pRotY, pPosX, cRotY, cPosX } = useControls('Transformaciones', {
+    gRotY: { value: 0, min: -Math.PI, max: Math.PI, step: 0.01 },
+    gPosX: { value: 0, min: -5, max: 5, step: 0.1 },
+    pRotY: { value: 0, min: -Math.PI, max: Math.PI, step: 0.01 },
+    pPosX: { value: 0, min: -5, max: 5, step: 0.1 },
+    cRotY: { value: 0, min: -Math.PI, max: Math.PI, step: 0.01 },
+    cPosX: { value: 0, min: -5, max: 5, step: 0.1 },
+  })
+
+  useFrame(() => {
+    refG.current.rotation.y = gRotY
+    refG.current.position.x = gPosX
+    refP.current.rotation.y = pRotY
+    refP.current.position.x = pPosX
+    refC.current.rotation.y = cRotY
+    refC.current.position.x = cPosX
+  })
+
+  return (
+    <group ref={refG} name="abuelo">
+      <group ref={refP} name="padre">
+        <group ref={refC} name="hijo">
+          <mesh position={[-1, 0, 0]}>
+            <boxGeometry args={[0.5, 0.5, 0.5]} />
+            <meshStandardMaterial color="lightblue" />
+          </mesh>
+          <mesh>
+            <sphereGeometry args={[0.4, 32, 32]} />
+            <meshStandardMaterial color="salmon" />
+          </mesh>
+          <mesh position={[1, 0, 0]}>
+            <coneGeometry args={[0.3, 1, 32]} />
+            <meshStandardMaterial color="khaki" />
+          </mesh>
+        </group>
+      </group>
+    </group>
+  )
+}
+```
+
+Unity:
+1. Crear UI:  
+   - Añadir `Canvas` con tres `Slider` (posición X, rotación Y, escala) y dos `Text` para mostrar valores.  
+   - Añadir un `Button` para pausar/reanudar y un `Text` para mostrar estado.  
+2. Script `ParentTransformController`:  
+   - Declarar referencias públicas `[Header("Sliders")]`, `[Header("Value Displays")]`, `[Header("Animation UI")]`, `[Header("Animation Settings")]`.  
+   - En `Start()`:  
+     - Inicializar sliders a valores actuales de `transform`.  
+     - Registrar listeners con `onValueChanged.AddListener` y `onClick.AddListener`.  
+     - Llamar a `UpdateUI()` y `UpdateAnimationUI()`.  
+   - En `Update()`:  
+     - Si `isAnimating`, rotar objeto padre alrededor de Y (`Rotate`) usando `rotationSpeed` y `Time.deltaTime`.  
+   - Métodos de callback:  
+     - `OnPosXChanged(float val)`: actualiza `localPosition.x`, `posXText.text` y `Debug.Log`.  
+     - `OnRotYChanged(float val)`: actualiza `localEulerAngles.y`, `rotYText.text` y `Debug.Log`.  
+     - `OnScaleChanged(float val)`: actualiza `localScale`, `scaleText.text` y `Debug.Log`.  
+     - `OnToggleAnimation()`: alterna `isAnimating`, actualiza UI de animación y registra en consola.  
+   - Métodos auxiliares:  
+     - `UpdateUI()`: fuerza sincronización de sliders con callbacks.  
+     - `UpdateAnimationUI()`: cambia texto de botón y `stateText`. 
+
+
+**Código relevante**
+```csharp
+public class ParentTransformController : MonoBehaviour
+{
+    [Header("Sliders")]
+    public Slider posXSlider;
+    public Slider rotYSlider;
+    public Slider scaleSlider;
+
+    [Header("Value Displays")]
+    public Text posXText;
+    public Text rotYText;
+    public Text scaleText;
+
+    [Header("Animation UI")]
+    public Button toggleAnimButton;
+    public Text stateText;
+
+    [Header("Animation Settings")]
+    public float rotationSpeed = 20f;
+
+    private bool isAnimating = true;
+
+    void Start()
+    {
+        // Inicializar sliders desde transform actual
+        posXSlider.value = transform.localPosition.x;
+        rotYSlider.value  = transform.localEulerAngles.y;
+        scaleSlider.value = transform.localScale.x;
+
+        // Registrar listeners
+        posXSlider.onValueChanged.AddListener(OnPosXChanged);
+        rotYSlider.onValueChanged.AddListener(OnRotYChanged);
+        scaleSlider.onValueChanged.AddListener(OnScaleChanged);
+        toggleAnimButton.onClick.AddListener(OnToggleAnimation);
+
+        // Sincronizar UI
+        UpdateUI();
+        UpdateAnimationUI();
+    }
+
+    void Update()
+    {
+        if (isAnimating)
+        {
+            transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+        }
+    }
+
+    // Callbacks de sliders
+    void OnPosXChanged(float val)
+    {
+        var p = transform.localPosition; p.x = val;
+        transform.localPosition = p;
+        posXText.text = $"Pos X: {val:F2}";
+        Debug.Log($"[Padre] Pos X = {val:F2}");
+    }
+
+    void OnRotYChanged(float val)
+    {
+        var r = transform.localEulerAngles; r.y = val;
+        transform.localEulerAngles = r;
+        rotYText.text = $"Rot Y: {val:F1}°";
+        Debug.Log($"[Padre] Rot Y = {val:F1}°");
+    }
+
+    void OnScaleChanged(float val)
+    {
+        transform.localScale = Vector3.one * val;
+        scaleText.text = $"Scale: {val:F2}";
+        Debug.Log($"[Padre] Scale = {val:F2}");
+    }
+
+    void UpdateUI()
+    {
+        OnPosXChanged(posXSlider.value);
+        OnRotYChanged(rotYSlider.value);
+        OnScaleChanged(scaleSlider.value);
+    }
+
+    // Toggle animación
+    void OnToggleAnimation()
+    {
+        isAnimating = !isAnimating;
+        UpdateAnimationUI();
+        Debug.Log(isAnimating 
+            ? "[Padre] Animación reiniciada" 
+            : "[Padre] Animación pausada");
+    }
+
+    void UpdateAnimationUI()
+    {
+        toggleAnimButton.GetComponentInChildren<Text>().text = isAnimating ? "Pausar" : "Reanudar";
+        stateText.text = isAnimating ? "Animando" : "Pausado";
+    }
+}
+```
+
+**Resultados Visuales**
+
+Threejs:
+
 ![Threejs](https://github.com/user-attachments/assets/f699d752-e061-4ab8-a688-e6b09b239e3d)
 
----
+Unity:
 
-## Unity:
-
-**Objetivo:**  
-Crear una interfaz interactiva que permita modificar en tiempo real la posición X, rotación Y y escala de un objeto padre en la jerarquía (padre → hijo → nieto), además de activar o pausar su animación de rotación continua.
-
-**Técnicas usadas:**  
-- **UI de Unity (uGUI):** Sliders (`Slider`) para entrada de valores y textos (`Text`) para mostrar los valores actuales.  
-- **Eventos de UI:** `onValueChanged` en sliders y `onClick` en botón para vincular callbacks.  
-- **Transformaciones locales:** Ajuste de `transform.localPosition`, `localEulerAngles` y `localScale`.  
-- **Ciclo de vida de MonoBehaviour:** Uso de `Start()` para inicializar y `Update()` para animación continua.  
-- **Debugging:** `Debug.Log` para registrar cambios en consola.
-
-**Pasos principales:**  
-1. **Escena y jerarquía:** Crear tres GameObjects anidados en orden padre → hijo → nieto.  
-2. **UI Setup:**  
-   - Añadir tres sliders y tres textos asociados.  
-   - Añadir un botón y un texto de estado para controlar la animación.  
-3. **Enlazar componentes:** En el inspector, arrastrar cada UI (slider/texto/botón) a sus campos públicos en `ParentTransformController`.  
-4. **Inicialización (`Start`)**  
-   - Ajustar sliders al estado inicial del objeto padre (`localPosition.x`, `localEulerAngles.y`, `localScale.x`).  
-   - Suscribir métodos `OnPosXChanged`, `OnRotYChanged` y `OnScaleChanged` a `onValueChanged` de cada slider.  
-   - Suscribir `OnToggleAnimation` al `onClick` del botón.  
-   - Llamar `UpdateUI()` y `UpdateAnimationUI()` para sincronizar valores en pantalla.  
-5. **Actualización continua (`Update`)**  
-   - Si `isAnimating` es verdadero, rotar el objeto padre en Y a velocidad `rotationSpeed`.  
-6. **Callbacks de sliders:**  
-   - **OnPosXChanged:** Actualiza `localPosition.x` y el texto `posXText`.  
-   - **OnRotYChanged:** Ajusta `localEulerAngles.y` y el texto `rotYText`.  
-   - **OnScaleChanged:** Cambia la escala uniforme y el texto `scaleText`.  
-   - Cada callback emite un `Debug.Log` con el valor nuevo.  
-7. **Control de animación:**  
-   - **OnToggleAnimation:** Alterna `isAnimating`, actualiza el texto del botón (“Pausar” / “Reanudar”) y el `stateText`, y registra en consola.
-
-**Resultado:**  
-Un objeto “padre” que gira automáticamente y cuyas transformaciones (posición X, rotación Y, escala) pueden ajustarse en tiempo real desde la UI. La jerarquía hace que los objetos “hijo” y “nieto” hereden dichas transformaciones, y el botón permite pausar o reanudar la animación para observar los efectos estáticos.
 ![Unity](https://github.com/user-attachments/assets/e6392f09-d635-4bb6-8171-13142d426ecd)
+
+## Reflexión Final
+
+Threejs:
+
+Este taller demuestra la potencia de las jerarquías en gráficos 3D, donde los cambios en el “abuelo” afectan a todos los descendientes, mientras que los hijos pueden tener transformaciones propias. Leva simplifica la creación de interfaces para ajustar parámetros en tiempo real. En proyectos futuros, exploraría animaciones predefinidas y estructuras de más niveles para comportamientos complejos.
+
+Unity:
+
+Este taller permite entender cómo conectar elementos UI con la lógica de transformación de objetos en Unity, y cómo gestionar eventos para crear interfaces dinámicas. La implementación de pausa/reanudar muestra la interacción entre ciclo de vida de Unity y UI. Para futuras mejoras, exploraría la interpolación suave de valores y la sincronización con animaciones de cinemática inversa o física.
+
+## Checklist de Entrega
+
+- [x] Carpeta `YYYY-MM-DD_nombre_taller`
+- [x] Código limpio y funcional
+- [x] GIF incluido con nombre descriptivo (si el taller lo requiere)
+- [x] Visualizaciones o métricas exportadas
+- [x] README completo y claro
+- [x] Commits descriptivos en inglés
+
+
+
+
+
+
+
+
